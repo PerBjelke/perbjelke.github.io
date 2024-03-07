@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas intro</title>
+
+    <style>
+        body {
+            margin: 0;
+            background-color: gray;
+            display: flex;
+            justify-content: center;
+        }
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            background-color: ghostwhite;
+            max-width: fit-content;
+
+            padding: 10px 10px;
+            border-radius: 10px;
+            margin-top: 30px;
+
+        }
+
+        #canvas{
+            border: 2px solid black;
+
+        }
+
+        .knapper button{
+            width: 20vw;
+            padding: 5px;
+            margin-top: 5px;
+
+        }
+    </style>
+</head>
+<body>
+    <main>
+    <h1>Introduksjon til Canvas</h1>
+
+    <canvas id="canvas" width="400px" height="500px"></canvas>
+
+    <div class="knapper">
+
+    <button id="random-color">Tilfeldig farge</button>
+    <button id="restart">Start på nytt</button>
+
+    </div>
+</main>
+    <script>
+        const canvas = document.getElementById('canvas')
+        const buttonEL = document.getElementById('random-color')
+        const restartEL = document.getElementById('restart')
+
+        let ctx = canvas.getContext('2d')
+
+        let color = "black"
+
+        function tegnSirkel(e){
+
+        /* ctx.clearRect(0,0,canvas.width,canvas.height) */
+
+        ctx.beginPath()
+
+        let x = e.offsetX
+        let y = e.offsetY
+        let r = 10
+
+        ctx.arc(x,y,r,0, 2*Math.PI)
+     
+        ctx.stroke()
+
+        ctx.fillStyle = color
+        ctx.fill()
+        }
+
+        function mouseMoving(){
+            canvas.addEventListener('mousemove',tegnSirkel)
+        }
+
+
+        canvas.addEventListener('mousedown', mouseMoving)
+
+        canvas.addEventListener('mouseup', function(){
+            canvas.removeEventListener('mousemove',tegnSirkel)
+        })
+
+
+        buttonEL.addEventListener('click', function(){
+            color = `rgb(${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)}, ${Math.floor(Math.random()*256)})` 
+        })
+        restartEL.addEventListener('click', function(){
+            ctx.clearRect(0,0,canvas.width,canvas.height) 
+        })
+        
+    </script>
+</body>
+</html>
