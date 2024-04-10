@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Document</title>
+<style>
+       #holderAvAlt{
+           display: flex;
+           justify-content: center;
+           align-items: center;
+           margin-top: 110px;
+           margin-right: 4%;
+       }
+       #holderAvTekst{
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+           margin-right: 7%;
+       }
+
+       #saldo{
+           margin: 25px auto 20px auto;
+           font-size: 27px;
+           font-weight: 600;
+           font-family: Arial, Helvetica, sans-serif
+       }
+       #tilbakeMeld{
+           padding: 8px;
+       }
+       #restart{
+           display: none;
+       }
+       #litenInfo{
+           font-size: small;
+           font-style: italic;
+           margin: 0;
+           margin-bottom: 10px;
+       }
+       #holderAvSpill{
+           display: grid;
+           grid-template-columns: repeat(5, 65px);
+           gap: 9px;
+           width: fit-content;
+       }
+       div{
+           background-color: black;
+           width: 65px;
+           height: 65px;
+           border-radius: 3.5px;
+       }
+       @media(max-width: 700px){
+           #holderAvAlt{
+               flex-direction: column;
+               margin-top: 50px;
+               margin-right: 0;
+           }
+           #mellomrom{
+               display: none;
+           }
+       }
+       @media(max-width: 410px){
+           div{
+               width: 57px;
+               height: 57px;
+           }
+           #holderAvSpill{
+               grid-template-columns: repeat(5, 57px);
+               gap: 10px;
+           }
+       }
+       @media(max-width: 350px){
+           div{
+               width: 50px;
+               height: 50px;
+           }
+           #holderAvSpill{
+               grid-template-columns: repeat(5, 50px);
+           }
+       }
+</style>
+</head>
+<body>
+<main id="holderAvAlt">
+<article id="holderAvTekst">
+<p id="saldo">Saldo: </p>
+<p id="bet">Bet:</p>
+<article id="holderBetGreieneVedSidenAvHverandre">
+<input type="number" id="betInp"></input>
+<button id="place">place</button>
+</article>
+<p id="tilbakeMeld">Earnings: </p>
+<button id="cashInn">Cash in</button>
+<button id="restart">Restart</button>
+<p id="mellomrom"></p>
+<p></p>
+<p id="litenInfo">Tips: du kan prøve uten å vedde noe</p>
+</article>
+<article id="holderAvSpill">
+</article>
+</main>
+<script>
+       bokserArr = []
+       for (let i = 0; i < 25; i++) {
+           boks = document.getElementById('holderAvSpill').appendChild(document.createElement('div'))
+boks.id = i
+           bokserArr.push(boks)
+       }
+       if(localStorage.saldo){
+           saldo = JSON.parse(localStorage.saldo)
+       }else{
+           saldo = 5000
+       }
+       saldoEl = document.getElementById('saldo')
+       saldoEl.innerHTML+=saldo.toFixed(1)+'kr'
+       place = document.getElementById('place')
+       betInp = document.getElementById('betInp')
+       bet = document.getElementById('bet')
+       tilbakeMeld = document.getElementById('tilbakeMeld')
+       cashInn = document.getElementById('cashInn')
+       restart = document.getElementById('restart')
+       function blaKlikk(e){
+           e.target.style.backgroundColor = 'blue'
+           gevinst += betSum/25
+           if(gevinst>=10)
+               tilbakeMeld.innerHTML=`Earnings: ${Math.floor(gevinst)}kr`
+           else if(gevinst<10){
+               tilbakeMeld.innerHTML=`Earnings: ${gevinst.toFixed(1)}kr`
+           }
+           e.target.removeEventListener('click',blaKlikk)
+       }
+       function rodKlikk(e){
+           e.target.style.backgroundColor = 'red'
+           tilbakeMeld.style.border = '1px dashed'
+           tilbakeMeld.innerHTML = 'Game over'
+           bet.innerHTML = 'Bet: 0kr'
+           betSum = 0
+           gevinst = 0
+           restart.style.display = 'inline-block'
+           restart.addEventListener('click', restartF)
+           cashInn.style.display = 'none'
+           for (let i = 0; i < bokserArr.length; i++) {
+               bokserArr[i].removeEventListener('click', blaKlikk)
+           }
+           randomBoks.removeEventListener('click',rodKlikk)
+       }
+       function restartF(){
+           for (let i = 0; i < bokserArr.length; i++) {
+               bokserArr[i].style.backgroundColor = 'black'
+           }
+           tilbakeMeld.style.border = 'none'
+           tilbakeMeld.innerHTML = 'Earnings: 0kr'
+           bet.innerHTML = 'Bet: 0kr'
+           betSum = 0
+           gevinst = 0
+           restart.style.display = 'none'
+           cashInn.style.display='inline-block'
+           place.style.display = 'inline-block'
+           betInp.style.display = 'inline-block'
+       }
+       function cashInnF(){
+           saldo += gevinst + betSum
+           saldoEl.innerHTML = `Saldo: ${saldo.toFixed(1)}kr`
+           gevinst = 0
+           betSum = 0
+           for (let i = 0; i < bokserArr.length; i++) {
+               bokserArr[i].removeEventListener('click',blaKlikk)
+           }
+           cashInn.style.display = 'none'
+           randomBoks.removeEventListener('click',rodKlikk)
+           restart.style.display = 'inline-block'
+           restart.addEventListener('click', restartF)
+           localStorage.saldo = saldo
+       }
+
+       place.addEventListener('click',function placeF(){
+           if(betInp.value <= saldo && betInp.value >= 0){
+               for (let i = 0; i < bokserArr.length; i++) {
+                   bokserArr[i].id = i+1
+               }
+               gevinst = 0
+               betSum = Number(betInp.value)
+               saldo -= betSum
+               betInp.value = ''
+               bet.innerHTML=`Bet: ${betSum}kr`
+               betInp.style.display = 'none'
+               place.style.display = 'none'
+               saldoEl.innerHTML=`Saldo: ${saldo.toFixed(1)}kr`
+               for (let i = 0; i < bokserArr.length; i++) {
+                   bokserArr[i].addEventListener('click', blaKlikk)
+               }
+               randomId = Math.floor(Math.random()*25+1)
+               randomBoks = document.getElementById(randomId)
+               console.log(randomId)
+               randomBoks.addEventListener('click',rodKlikk)
+               cashInn.addEventListener('click',cashInnF)
+           }
+           else if(betInp.value<0){
+               tilbakeMeld.innerHTML = 'Bet må være mindre eller lik saldo'
+           }
+           else{
+               tilbakeMeld.innerHTML = 'Bet må være mindre eller lik saldo'
+           }
+       })
+</script>
+</body>
+</html>
